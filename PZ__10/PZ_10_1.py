@@ -4,3 +4,23 @@
 ## 2. какие товары из РейнаТур, отсутствуют в Вояж
 ## 3. перечень одинаковых туров.
 ## 4. равны ли перечни туров
+
+# Определим туры, предлагаемые агентствами
+voyage_tours = {"Мексика", "Канада", "Израиль", "Италия"}
+reina_tours = {"Англия", "Япония", "Канада", "ЮАР"}
+
+# 1. Туры из Вояж, отсутствующие в РейнаТур
+tours_only_in_voyage = voyage_tours - reina_tours
+print("Туры из Вояж, отсутствующие в РейнаТур:", tours_only_in_voyage)
+
+# 2. Туры из РейнаТур, отсутствующие в Вояж
+tours_only_in_reina = reina_tours - voyage_tours
+print("Туры из РейнаТур, отсутствующие в Вояж:", tours_only_in_reina)
+
+# 3. Перечень одинаковых туров
+common_tours = voyage_tours & reina_tours
+print("Одинаковые туры:", common_tours)
+
+# 4. Равны ли перечни туров
+are_tours_equal = voyage_tours == reina_tours
+print("Перечни туров равны:", are_tours_equal)
