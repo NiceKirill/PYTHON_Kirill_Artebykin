@@ -5,12 +5,12 @@
 # Определяем знаки препинания
 punctuation = '''!()-[]{};:'"\,<>./?@#$%^&*_~'''
 
-# Читаем исходный файл
+# Читение исходного файла
 with open('text18-2.txt', 'r', encoding='utf-8') as file:
     content = file.read()
     lines = file.readlines()
 
-# Выводим содержимое файла
+# Вывод содержимого файла
 print("Содержимое файла:")
 print(content)
 
@@ -18,7 +18,7 @@ print(content)
 punctuation_count = sum(1 for char in content if char in punctuation)
 print(f"\nКоличество знаков препинания: {punctuation_count}")
 
-# Записываем строки в обратном порядке в новый файл
+# Строки в обратном порядке в новый файл
 with open('reversed_poem.txt', 'w', encoding='utf-8') as new_file:
     reversed_lines = reversed(content.split('\n'))
     new_file.write('\n'.join(reversed_lines))
