@@ -22,7 +22,7 @@ def check_brackets(string):
         return 0
 
 
-# Пример использования
+# Пример использования.
 string = "((a+b)*(c-d))"
 print(check_brackets(string))  # Ожидаемый результат: 0
 
