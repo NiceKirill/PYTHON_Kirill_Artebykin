@@ -8,10 +8,8 @@ vowels = set('аеиоуъюяАЕИОУЪЮЯ')
 result = []
 
 for city in cities:
-    # Оставляем только согласные буквы. Приводим каждую букву к верхнему регистру
     consonants = [letter.upper() for letter in city if letter.upper() not in vowels]
 
-    # Собираем оставшиеся согласные в строку и добавляем в результат
     result.append(''.join(consonants))
 
 print(result)
