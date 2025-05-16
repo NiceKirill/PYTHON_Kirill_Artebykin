@@ -1,31 +1,20 @@
 ## В двумерном списке найти сумму отрицательных элементов в первой трети
 ## матрицы.
 
+import random
+
+matrix = [[random.randint(-10, 10) for _ in range(3)] for _ in range(3)]
+
 def sum_negatives_in_first_third(matrix):
     if not matrix:
         return 0
 
-    n = len(matrix)
-    first_third = n // 3
-    total_sum = 0
+    first_third_rows = matrix[:len(matrix) // 3]
+    negatives = [num for row in first_third_rows for num in row if num < 0]
+    return sum(negatives)
 
-    for i in range(first_third):
-        for num in matrix[i]:
-            if num < 0:
-                total_sum += num
-
-    return total_sum
-
-
-# Пример
-matrix = [
-    [1, -2, 3],
-    [-4, 5, -6],
-    [7, -8, 9],
-    [10, -11, 12],
-    [-13, 14, -15],
-    [16, -17, 18]
-]
+print("Случайная матрица:")
+print(*matrix, sep='\n')
 
 result = sum_negatives_in_first_third(matrix)
-print(result)
+print("\nСумма отрицательных элементов в первой трети:", result)
