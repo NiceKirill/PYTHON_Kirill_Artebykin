@@ -4,27 +4,52 @@
 
 import re
 
-total_works = 0
-writers_info = []
+def process_writers_file(file_path):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        content = file.read()
 
-with open('writer.txt', 'r', encoding='utf-8') as file:
-    for line in file:
-        # Регулярное выражение для извлечения данных
-        match = re.match(r"(.+?) \((\d{4}-\d{4})\): (.+)", line.strip())
-        if match:
-            name = match.group(1)
-            years = match.group(2)
-            works = [work.strip() for work in match.group(3).split(',')]
+    # Извлечения информации о писателях
+    writer_pattern = re.compile(
+        r'(?P<name>[А-Я][а-я]+ [А-Я][а-я]+(?: [А-Я][а-я]+)?)\s*\((?P<years>\d{4}-\d{4})\)\s*:\s*(?P<works>.+?)(?=\n\n|\Z)',
+        re.DOTALL
+    )
 
-            writers_info.append({
-                'name': name,
-                'years': years,
-                'works': works
-            })
+    # Разделения произведений
+    works_pattern = re.compile(r'«(.+?)»')
 
-            total_works += len(works)
+    writers = []
+    total_works = 0
 
-for writer in writers_info:
-    print(f"{writer['name']} ({writer['years']}): {', '.join(writer['works'])}")
+    # Поиск всех совпадений
+    for match in writer_pattern.finditer(content):
+        name = match.group('name')
+        years = match.group('years')
+        works_text = match.group('works')
 
-print(f"\nОбщее количество произведений: {total_works}")
+        works = works_pattern.findall(works_text)
+        work_count = len(works)
+        total_works += work_count
+
+        writers.append({
+            'name': name,
+            'years': years,
+            'works': works,
+            'work_count': work_count
+        })
+
+    print("Информация о писателях и их произведениях:")
+    print("-" * 50)
+    for writer in writers:
+        print(f"Писатель: {writer['name']}")
+        print(f"Годы жизни: {writer['years']}")
+        print("Произведения:")
+        for i, work in enumerate(writer['works'], 1):
+            print(f"  {i}. {work}")
+        print(f"Всего произведений: {writer['work_count']}")
+        print("-" * 50)
+
+    print(f"\nОбщее количество произведений в файле: {total_works}")
+
+if __name__ == "__main__":
+    file_path = "writer.txt"
+    process_writers_file(file_path)
