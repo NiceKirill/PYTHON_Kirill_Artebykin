@@ -4,52 +4,67 @@
 
 import re
 
-def process_writers_file(file_path):
+
+def extract_writers_info(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         content = file.read()
 
-    # Извлечения информации о писателях
-    writer_pattern = re.compile(
-        r'(?P<name>[А-Я][а-я]+ [А-Я][а-я]+(?: [А-Я][а-я]+)?)\s*\((?P<years>\d{4}-\d{4})\)\s*:\s*(?P<works>.+?)(?=\n\n|\Z)',
-        re.DOTALL
+    # Паттерн для извлечения фамилии, инициалов, годов жизни и произведений
+    pattern = re.compile(
+        r'^(?P<surname>[А-Я][а-яё]+(?:-[А-Я][а-яё]+)?)\s+(?P<initials>[А-Я]\.[А-Я]\.)\((?P<years>\d{4}-\d{4})\)[^.]*\.(?P<works>.*?)(?=\n\s*[А-Я]|\Z)',
+        re.MULTILINE | re.DOTALL
     )
-
-    # Разделения произведений
-    works_pattern = re.compile(r'«(.+?)»')
 
     writers = []
     total_works = 0
 
-    # Поиск всех совпадений
-    for match in writer_pattern.finditer(content):
-        name = match.group('name')
+    for match in pattern.finditer(content):
+        surname = match.group('surname')
+        initials = match.group('initials')
         years = match.group('years')
         works_text = match.group('works')
 
-        works = works_pattern.findall(works_text)
-        work_count = len(works)
-        total_works += work_count
+        # Извлекаем произведения
+        works = []
+        works_matches = re.findall(r'«([^»]+)»', works_text)
+        if works_matches:
+            works.extend(works_matches)
 
-        writers.append({
-            'name': name,
-            'years': years,
-            'works': works,
-            'work_count': work_count
-        })
+        # Проверяем на наличие "и другие" или "и многих других"
+        if re.search(r'и (?:многих )?других', works_text):
+            works.append("... и другие произведения")
 
-    print("Информация о писателях и их произведениях:")
-    print("-" * 50)
-    for writer in writers:
-        print(f"Писатель: {writer['name']}")
-        print(f"Годы жизни: {writer['years']}")
-        print("Произведения:")
-        for i, work in enumerate(writer['works'], 1):
-            print(f"  {i}. {work}")
-        print(f"Всего произведений: {writer['work_count']}")
-        print("-" * 50)
+        # Добавляем писателя в список
+        writer_info = {
+            'Фамилия': surname,
+            'Инициалы': initials,
+            'Годы жизни': years,
+            'Произведения': works
+        }
+        writers.append(writer_info)
+        total_works += len(works)
 
-    print(f"\nОбщее количество произведений в файле: {total_works}")
+    return writers, total_works
+
+
+def main():
+    file_path = 'writer.txt'
+    writers, total_works = extract_writers_info(file_path)
+
+    # Вывод информации о писателях
+    for i, writer in enumerate(writers, 1):
+        print(f"{i}. {writer['Фамилия']} {writer['Инициалы']} ({writer['Годы жизни']})")
+        if writer['Произведения']:
+            print("   Произведения:")
+            for work in writer['Произведения']:
+                print(f"   - {work}")
+        else:
+            print("   Произведения: не указаны")
+        print()
+
+    # Вывод общего количества произведений
+    print(f"\nОбщее количество произведений: {total_works}")
+
 
 if __name__ == "__main__":
-    file_path = "writer.txt"
-    process_writers_file(file_path)
+    main()
