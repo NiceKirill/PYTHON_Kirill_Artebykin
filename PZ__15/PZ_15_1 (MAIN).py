@@ -1,9 +1,3 @@
-## Приложение АБИТУРИЕНТ для автоматизации работы приемной комиссии,
-## которая обеспечивает обработку анкетных данных абитуриентов. Таблица Анкета
-## содержит следующие данные об абитуриентах: Регистрационный номер, Фамилия, Имя,
-## Отчество, Дата Рождения, Награды (наличие кр. Диплома или медали (да/нет)), Адрес,
-## выбранная Специальность.
-
 import sqlite3
 from datetime import datetime
 
@@ -11,6 +5,23 @@ class AbiturientApp:
     def __init__(self):
         self.conn = sqlite3.connect('abiturient.db')
         self.cursor = self.conn.cursor()
+        self._create_table()
+
+    def _create_table(self):
+        """Создает таблицу, если она не существует"""
+        self.cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Анкета (
+            reg_number INTEGER PRIMARY KEY AUTOINCREMENT,
+            last_name TEXT NOT NULL,
+            first_name TEXT NOT NULL,
+            middle_name TEXT,
+            birth_date TEXT NOT NULL,
+            awards TEXT NOT NULL,
+            address TEXT NOT NULL,
+            specialty TEXT NOT NULL
+        )
+        ''')
+        self.conn.commit()
 
     def add_abiturient(self):
         print("\nДобавление нового абитуриента")
@@ -90,6 +101,78 @@ class AbiturientApp:
 Специальность: {abiturient[7]}
             """)
 
+    def edit_abiturient(self):
+        print("\nРедактирование данных абитуриента")
+        self.view_abiturients()
+        reg_number = input("\nВведите регистрационный номер абитуриента для редактирования: ")
+
+        try:
+            reg_number = int(reg_number)
+        except ValueError:
+            print("Неверный формат регистрационного номера")
+            return
+
+        # Проверяем, существует ли абитуриент
+        self.cursor.execute('SELECT * FROM Анкета WHERE reg_number = ?', (reg_number,))
+        abiturient = self.cursor.fetchone()
+
+        if not abiturient:
+            print("Абитуриент с таким номером не найден")
+            return
+
+        print("\nТекущие данные абитуриента:")
+        print(f"1. Фамилия: {abiturient[1]}")
+        print(f"2. Имя: {abiturient[2]}")
+        print(f"3. Отчество: {abiturient[3]}")
+        print(f"4. Дата рождения: {abiturient[4]}")
+        print(f"5. Награды: {abiturient[5]}")
+        print(f"6. Адрес: {abiturient[6]}")
+        print(f"7. Специальность: {abiturient[7]}")
+
+        field = input("\nВведите номер поля для редактирования (1-7) или 0 для отмены: ")
+
+        if field == '0':
+            return
+        elif field == '1':
+            new_value = input("Новая фамилия: ")
+            column = 'last_name'
+        elif field == '2':
+            new_value = input("Новое имя: ")
+            column = 'first_name'
+        elif field == '3':
+            new_value = input("Новое отчество: ")
+            column = 'middle_name'
+        elif field == '4':
+            while True:
+                new_value = input("Новая дата рождения (ДД.ММ.ГГГГ): ")
+                try:
+                    datetime.strptime(new_value, '%d.%m.%Y')
+                    break
+                except ValueError:
+                    print("Неверный формат даты. Попробуйте снова.")
+            column = 'birth_date'
+        elif field == '5':
+            new_value = input("Наличие наград (да/нет): ").lower()
+            while new_value not in ['да', 'нет']:
+                print("Пожалуйста, введите 'да' или 'нет'")
+                new_value = input("Наличие наград (да/нет): ").lower()
+            column = 'awards'
+        elif field == '6':
+            new_value = input("Новый адрес: ")
+            column = 'address'
+        elif field == '7':
+            new_value = input("Новая специальность: ")
+            column = 'specialty'
+        else:
+            print("Неверный выбор поля")
+            return
+
+        self.cursor.execute(f'''
+        UPDATE Анкета SET {column} = ? WHERE reg_number = ?
+        ''', (new_value, reg_number))
+        self.conn.commit()
+        print("Данные абитуриента успешно обновлены!")
+
     def delete_abiturient(self):
         self.view_abiturients()
         reg_number = input("\nВведите регистрационный номер абитуриента для удаления: ")
@@ -150,11 +233,12 @@ class AbiturientApp:
             print("1. Добавить абитуриента")
             print("2. Просмотреть всех абитуриентов")
             print("3. Поиск абитуриента")
-            print("4. Удалить абитуриента")
-            print("5. Сформировать отчет")
-            print("6. Выход")
+            print("4. Редактировать абитуриента")
+            print("5. Удалить абитуриента")
+            print("6. Сформировать отчет")
+            print("7. Выход")
 
-            choice = input("Выберите действие (1-6): ")
+            choice = input("Выберите действие (1-7): ")
 
             if choice == '1':
                 self.add_abiturient()
@@ -163,10 +247,12 @@ class AbiturientApp:
             elif choice == '3':
                 self.search_abiturient()
             elif choice == '4':
-                self.delete_abiturient()
+                self.edit_abiturient()
             elif choice == '5':
-                self.generate_report()
+                self.delete_abiturient()
             elif choice == '6':
+                self.generate_report()
+            elif choice == '7':
                 print("Выход из программы")
                 self.conn.close()
                 break
